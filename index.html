@@ -815,17 +815,37 @@ const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 /* ------------------------------- TABS ------------------------------------ */
 
 const tabs = [...document.querySelectorAll('[role="tab"]')];
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => {
-      const on = t === tab;
-      t.setAttribute("aria-selected", on);
-      const panel = document.getElementById(t.getAttribute("aria-controls"));
-      panel.hidden = !on;
-      panel.classList.toggle("active", on);
-    });
+
+// Select a tab: toggle panels, move the roving tabindex, optionally take focus.
+function selectTab(tab, focus = false) {
+  tabs.forEach(t => {
+    const on = t === tab;
+    t.setAttribute("aria-selected", on);
+    t.tabIndex = on ? 0 : -1; // roving tabindex: only the active tab is in tab order
+    const panel = document.getElementById(t.getAttribute("aria-controls"));
+    panel.hidden = !on;
+    panel.classList.toggle("active", on);
+  });
+  if (focus) tab.focus();
+}
+
+tabs.forEach((tab, i) => {
+  tab.addEventListener("click", () => selectTab(tab));
+  // Left/Right (and Home/End) move between tabs, per the ARIA tablist pattern.
+  tab.addEventListener("keydown", e => {
+    let next;
+    if (e.key === "ArrowRight") next = tabs[(i + 1) % tabs.length];
+    else if (e.key === "ArrowLeft") next = tabs[(i - 1 + tabs.length) % tabs.length];
+    else if (e.key === "Home") next = tabs[0];
+    else if (e.key === "End") next = tabs[tabs.length - 1];
+    else return;
+    e.preventDefault();
+    selectTab(next, true);
   });
 });
+
+// Match the roving tabindex to the tab selected in the markup on load.
+selectTab(tabs.find(t => t.getAttribute("aria-selected") === "true") || tabs[0]);
 
 /* ----------------------------- SETTLE IT --------------------------------- */
 
