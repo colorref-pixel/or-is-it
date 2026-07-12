@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Or Is It? — The Color Argument Referee</title>
+<title>Or Is It? The Color Argument Referee</title>
 <meta name="description" content="Settle pointless color arguments forever. Is it blue or grey? Teal or green? Or Is It? generates genuinely ambiguous colors, judges them, and declares a winner. Nobody wins gracefully.">
 
 <!-- Google tag (gtag.js) -->
@@ -444,7 +444,7 @@ footer p { margin: 0 0 1.2rem; }
   <div class="hero">
     <span class="eyebrow">The Color Argument Referee</span>
     <h1>Or is it<span class="q">?</span></h1>
-    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. Step into the ring — the referee has HSL values and no sympathy.</p>
+    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. Step into the ring. The referee has HSL values and no sympathy.</p>
   </div>
   <nav role="tablist" aria-label="Ways to fight about color">
     <button class="tab" role="tab" id="tab-settle" aria-controls="panel-settle" aria-selected="true">⚖ Settle It</button>
@@ -459,7 +459,7 @@ footer p { margin: 0 0 1.2rem; }
   <section class="panel active" id="panel-settle" role="tabpanel" aria-labelledby="tab-settle">
     <div class="card">
       <h2>Settle It</h2>
-      <p class="rules">Two disputants. One indefensible color. One of you calls it; the other is stuck defending the opposite corner. The referee measures where it actually sits. Loser buys coffee.</p>
+      <p class="rules">Two disputants. One indefensible color. One of you calls it; the other is stuck defending the opposite corner. The referee measures where it sits. Loser buys coffee.</p>
 
       <div class="names">
         <label>Disputant one
@@ -502,7 +502,7 @@ footer p { margin: 0 0 1.2rem; }
   <section class="panel" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
     <div class="card">
       <h2>Test Yourself</h2>
-      <p class="rules">Ten colors, each parked exactly where two names go to war. Call each one. We score you against where the color mathematically leans — the closest thing to a crowd that never blinks.</p>
+      <p class="rules">Ten colors, each parked where two names go to war. Call each one. We score you against where the color mathematically leans: the closest thing to a crowd that never blinks.</p>
 
       <div id="quiz-intro" style="text-align:center">
         <button class="btn primary big" id="quiz-start">Start the gauntlet</button>
@@ -548,7 +548,7 @@ footer p { margin: 0 0 1.2rem; }
 </main>
 
 <footer>
-  <p>No color was harmed. Several friendships were. · <em>Or Is It?</em> renders everything in your browser — nothing is uploaded, tracked, or stored.</p>
+  <p>No color was harmed. Several friendships were. · <em>Or Is It?</em> runs in your browser. No accounts. Basic visitor analytics, nothing personal.</p>
   <div class="stripes" aria-hidden="true"></div>
 </footer>
 
@@ -620,12 +620,12 @@ const FAMOUS = [
   {
     name: "The Dress", fight: "blue & black vs white & gold",
     h: 222, s: 27, l: 57,
-    story: "February 2015. One washed-out photo of a bodycon dress split the internet into two irreconcilable nations overnight. The dress itself was blue and black; your brain's guess about the lighting decided which team you joined. This swatch is the disputed blue from the photo — dim, desaturated, and still starting fights."
+    story: "February 2015. One washed-out photo of a bodycon dress split the internet into two irreconcilable nations overnight. The dress itself was blue and black; your brain's guess about the lighting decided which team you joined. This swatch is the disputed blue from the photo: dim, desaturated, and still starting fights."
   },
   {
     name: "Periwinkle", fight: "blue vs purple",
     h: 240, s: 65, l: 76,
-    story: "The crayon that launched a thousand playground arguments. Periwinkle sits at hue 240 — the exact seam where blue starts flirting with violet. Crayola calls it blue. Pantone leans lavender. Your aunt insists it's lilac. Everyone is a little bit right, which is the worst possible outcome."
+    story: "The crayon that launched a thousand playground arguments. Periwinkle sits at hue 240, the exact seam where blue starts flirting with violet. Crayola calls it blue. Pantone leans lavender. Your aunt insists it's lilac. Everyone is a little bit right, which is the worst possible outcome."
   },
   {
     name: "Olive", fight: "green vs yellow vs brown",
@@ -635,17 +635,17 @@ const FAMOUS = [
   {
     name: "Teal vs Turquoise", fight: "the cyan civil war",
     h: 174, s: 62, l: 45,
-    story: "Both live in the 170–180° cyan zone; the difference is vibes. Turquoise is brighter and leans green like the gemstone; teal is darker and moodier like the duck it's named after. Interior designers have ended long partnerships over which one the sofa is."
+    story: "Both live in the 170 to 180° cyan zone; the difference is vibes. Turquoise is brighter and leans green like the gemstone; teal is darker and moodier like the duck it's named after. Interior designers have ended long partnerships over which one the sofa is."
   },
   {
     name: "Salmon", fight: "pink vs orange",
     h: 14, s: 85, l: 71,
-    story: "Hue 14 is firmly orange territory, but crank the lightness and suddenly everyone says pink. Salmon is the proof that 'pink' isn't a hue at all — it's what your brain calls warm colors that got pale. The fish, for the record, declined to comment."
+    story: "Hue 14 is firmly orange territory, but crank the lightness and suddenly everyone says pink. Salmon is the proof that 'pink' isn't a hue at all. It's what your brain calls warm colors that got pale. The fish, for the record, declined to comment."
   },
   {
     name: "The Tennis Ball", fight: "green vs yellow",
     h: 68, s: 85, l: 55,
-    story: "Officially 'optic yellow,' invented in 1972 so TV viewers could see the ball. Roger Federer says green. The International Tennis Federation says yellow. At hue 68 it is chartreuse, the no-man's-land between them — engineered to be visible to everyone and nameable by no one."
+    story: "Officially 'optic yellow,' invented in 1972 so TV viewers could see the ball. Roger Federer says green. The International Tennis Federation says yellow. At hue 68 it is chartreuse, the no-man's-land between them, engineered to be visible to everyone and nameable by no one."
   },
   {
     name: "Space Grey", fight: "grey vs blue",
@@ -901,7 +901,7 @@ function ruleOnBout(claimed) {
     $("settle-snark").textContent = pick(TOSSUP_LINES);
   } else {
     $("settle-call").innerHTML =
-      `The color leans <span class="win">${cap(verdict)}</span> — point, ${escapeHtml(winner)}`;
+      `The color leans <span class="win">${cap(verdict)}</span>. Point, ${escapeHtml(winner)}`;
     $("settle-snark").textContent = pick(WIN_LINES)
       .replaceAll("{winner}", winner)
       .replaceAll("{loser}", loser)
@@ -972,7 +972,7 @@ function answerRound(chosen) {
   $("quiz-score").textContent = `Matches: ${quiz.matches}`;
   $("quiz-feedback").textContent =
     verdict === "toss-up"
-      ? `That one was a genuine toss-up. Free point — even the math shrugged.`
+      ? `That one was a genuine toss-up. Free point: even the math shrugged.`
       : matched
         ? `Agreed. It leans ${verdict}.`
         : `The color leans ${verdict}. You said ${chosen}. Someone's drifting.`;
@@ -993,7 +993,7 @@ const QUIZ_TIERS = [
   [5, "A coin with opinions.",
       "Half the time you agree with the numbers, half the time you freelance. Bold. Statistically indistinguishable from guessing, but bold."],
   [3, "Your monitor is fine. This is on you.",
-      "You didn't just disagree with the crowd — you built a worldview out of it. We admire the commitment. We question the results."],
+      "You disagreed with the crowd and built a worldview out of it. We admire the commitment. We question the results."],
   [0, "Legally, we can't let you name paint.",
       "An extraordinary run. You saw teal and said pink. Somewhere, a color scientist felt a chill and didn't know why."],
 ];
