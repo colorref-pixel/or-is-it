@@ -218,6 +218,31 @@ details.tech summary {
 details.tech summary:hover { color: var(--ink); }
 details.tech p { margin: .5rem 0 0; letter-spacing: .06em; }
 
+/* ---- The Science: expandable case-file cards ---- */
+.sci-card {
+  border: var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--ink);
+  margin-top: 1rem;
+  overflow: hidden;
+}
+.sci-card summary {
+  cursor: pointer;
+  list-style: none;
+  padding: .9rem 1.2rem;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.sci-card summary::-webkit-details-marker { display: none; }
+.sci-card summary::before { content: "▸ "; color: var(--whistle); }
+.sci-card[open] summary::before { content: "▾ "; }
+.sci-card p { margin: 0 0 .9rem; padding: 0 1.2rem; font-size: .95rem; }
+.sci-card .note { color: var(--ink-soft); font-size: .85rem; font-style: italic; }
+
 /* ---- Buttons ---- */
 .btn {
   font-family: var(--display);
@@ -384,6 +409,7 @@ footer p { margin: 0 0 1.2rem; }
   <nav role="tablist" aria-label="Ways to fight about color">
     <button class="tab" role="tab" id="tab-quiz" aria-controls="panel-quiz" aria-selected="true">👁 Test Yourself</button>
     <button class="tab" role="tab" id="tab-famous" aria-controls="panel-famous" aria-selected="false">🏆 The Famous Ones</button>
+    <button class="tab" role="tab" id="tab-science" aria-controls="panel-science" aria-selected="false">🔬 The Science</button>
   </nav>
 </header>
 
@@ -453,6 +479,69 @@ footer p { margin: 0 0 1.2rem; }
           </details>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============================ THE SCIENCE ============================ -->
+  <section class="panel" id="panel-science" role="tabpanel" aria-labelledby="tab-science" hidden>
+    <div class="card">
+      <h2>Color Science</h2>
+      <p class="rules">The referee's case files. Why reasonable people end friendships over swatches, explained in plain language. Open a file.</p>
+
+      <details class="sci-card" id="sci-why">
+        <summary>Why you fight about color</summary>
+        <p>Color names are not facts. They are territories with fuzzy borders, and every brain draws the map a little differently. Your blue region and your friend's blue region overlap almost everywhere. The arguments live in the sliver where they don't.</p>
+        <p>Every color on this site is generated to sit on one of those borders. When two of you disagree here, you are both right by your own maps. The referee just measures which side of the line the color technically sits on.</p>
+      </details>
+
+      <details class="sci-card" id="sci-lighting">
+        <summary>Lighting is the real villain</summary>
+        <p>Your brain constantly edits what your eyes report. It estimates the light in the room and subtracts it, which is why a white shirt still looks white at sunset even though it is objectively orange at that moment. Scientists call this color constancy, and it runs so smoothly you never notice it working.</p>
+        <p>It also means the same object can honestly look different under warm bulbs, cool daylight, or office fluorescents. If you and a friend argued about a color in different rooms, you may both have been reporting accurately.</p>
+      </details>
+
+      <details class="sci-card" id="sci-screens">
+        <summary>Your screen has opinions</summary>
+        <p>No two screens show the same color. Panel type, age, brightness, color profile, and that amber night-mode filter all nudge the output. A grey laptop can genuinely look blue on one phone and grey on another.</p>
+        <p>This is why arguing about a color in a photo someone texted you is really a four-way fight: your eyes, their eyes, and two screens with agendas.</p>
+      </details>
+
+      <details class="sci-card" id="sci-dress">
+        <summary>The Dress, a post-mortem</summary>
+        <p>The 2015 photo was badly overexposed, which stripped away the clues your brain uses to judge lighting. So it guessed. Brains that assumed cool daylight shadow subtracted blue and saw white and gold. Brains that assumed warm indoor light subtracted yellow and saw blue and black.</p>
+        <p>The actual dress was blue and black. The photo was a perfect trap: one image, two completely reasonable interpretations, and no way to settle it by staring harder.</p>
+      </details>
+
+      <details class="sci-card" id="sci-tennis">
+        <summary>The tennis ball file</summary>
+        <p>In 1972 tennis switched to a color officially named optic yellow because it showed up best on television. It sits at the exact seam where yellow becomes green, which is why Roger Federer says green and the International Tennis Federation says yellow.</p>
+        <p>Nobody is wrong. The ball was engineered for visibility, not nameability.</p>
+      </details>
+
+      <details class="sci-card" id="sci-olive">
+        <summary>Olive's identity crisis</summary>
+        <p>Olive is dark yellow. Measure it and the numbers land squarely in yellow territory. But brains file dark yellows under green or brown, because bright is the only way we expect yellow to show up.</p>
+        <p>That is why nobody has ever complimented an olive on being a lovely yellow. The name gave up and became a food.</p>
+      </details>
+
+      <details class="sci-card" id="sci-grey">
+        <summary>Grey, the great impostor</summary>
+        <p>Grey is what every color becomes when you drain the pigment out, so any faint tint can claim it. A whisper of blue in a grey reads as plain grey to one person and unmistakably blue to another, and both calls are defensible.</p>
+        <p>This is the most common color argument in the world, which is why laptops, cars, and paint chips start so many of them. When there is barely any pigment, your lighting and your screen cast the deciding vote.</p>
+      </details>
+
+      <details class="sci-card" id="sci-context">
+        <summary>The company a color keeps</summary>
+        <p>Colors change with their neighbors. The same grey square looks darker on a white background and lighter on a black one. Designers call it simultaneous contrast. Brains just call it seeing.</p>
+        <p>The swatch you argued about was never alone. It sat on a wall, in a room, next to other colors that were quietly tilting the vote.</p>
+      </details>
+
+      <details class="sci-card" id="sci-eyes">
+        <summary>When eyes disagree</summary>
+        <p>Roughly 1 in 12 men and 1 in 200 women see color differently, most often finding reds and greens harder to tell apart. It is usually inherited, present from birth, and invisible to the person who has it until a test or an argument reveals it.</p>
+        <p>If someone in your life keeps losing color arguments, they may simply be playing with different equipment.</p>
+        <p class="note">This is a fun read, not an eye exam. If you're curious about your own color vision, an optometrist can test it properly.</p>
+      </details>
     </div>
   </section>
 
