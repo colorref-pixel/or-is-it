@@ -665,31 +665,9 @@ function hslToRgb(h, s, l) {
   return [f(0), f(8), f(4)].map(v => Math.round(v * 255));
 }
 
-/** RGB (0–255 each) → HSL (h 0–360, s/l 0–100). Kept for tinkering/console use. */
-function rgbToHsl(r, g, b) {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
-  let h = 0;
-  if (d) {
-    if (max === r) h = ((g - b) / d) % 6;
-    else if (max === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h = (h * 60 + 360) % 360;
-  }
-  const l = (max + min) / 2;
-  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-  return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
-}
-
 /** RGB → "#rrggbb". */
 function rgbToHex(r, g, b) {
   return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
-}
-
-/** "#rrggbb" → [r, g, b]. */
-function hexToRgb(hex) {
-  const n = parseInt(hex.replace("#", ""), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
 const hexOf = c => rgbToHex(...hslToRgb(c.h, c.s, c.l));
