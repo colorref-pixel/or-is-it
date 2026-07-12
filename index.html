@@ -181,14 +181,6 @@ h2 {
   padding: 1rem 1.2rem;
   transition: background-color .6s ease;
 }
-.swatch .hex {
-  font-family: var(--mono);
-  font-size: clamp(1rem, 3vw, 1.35rem);
-  font-weight: 700;
-  letter-spacing: .06em;
-  user-select: all;
-}
-
 .readout {
   font-family: var(--mono);
   font-size: .85rem;
@@ -197,6 +189,34 @@ h2 {
   margin: .7rem 0 0;
   letter-spacing: .04em;
 }
+
+/* Plain-language color description (the default, jargon-free readout) */
+.desc {
+  text-align: center;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin: .7rem 0 0;
+}
+
+/* "Technical details" disclosure: hsl/hex live here for the curious */
+details.tech {
+  max-width: 480px;
+  margin: .6rem auto 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: .8rem;
+  color: var(--ink-soft);
+}
+details.tech summary {
+  cursor: pointer;
+  display: inline-block;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-bottom: 1px dashed var(--ink-soft);
+  padding-bottom: .1rem;
+}
+details.tech summary:hover { color: var(--ink); }
+details.tech p { margin: .5rem 0 0; letter-spacing: .06em; }
 
 /* ---- Buttons ---- */
 .btn {
@@ -377,8 +397,8 @@ footer p { margin: 0 0 1.2rem; }
 
       <div id="quiz-intro" style="text-align:center">
         <div id="quiz-demo-block">
-          <div class="swatch" id="quiz-demo" style="height:150px" aria-hidden="true"><span class="hex"></span></div>
-          <p class="readout" id="quiz-demo-readout"></p>
+          <div class="swatch" id="quiz-demo" style="height:150px" aria-hidden="true"></div>
+          <p class="desc" id="quiz-demo-readout"></p>
           <p class="prompt-line" id="quiz-demo-caption"></p>
         </div>
         <button class="btn primary big" id="quiz-start">Start the gauntlet</button>
@@ -389,8 +409,12 @@ footer p { margin: 0 0 1.2rem; }
           <span id="quiz-round">Round 1 / 10</span>
           <span id="quiz-score">Matches: 0</span>
         </div>
-        <div class="swatch" id="quiz-swatch"><span class="hex"></span></div>
-        <p class="readout" id="quiz-readout"></p>
+        <div class="swatch" id="quiz-swatch"></div>
+        <p class="desc" id="quiz-readout"></p>
+        <details class="tech">
+          <summary>Technical details</summary>
+          <p id="quiz-tech"></p>
+        </details>
         <div class="choice-row" id="quiz-choices"></div>
         <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
       </div>
@@ -415,13 +439,18 @@ footer p { margin: 0 0 1.2rem; }
       <div class="famous-detail" id="famous-detail" hidden>
         <h3 id="fd-name"></h3>
         <p class="fight" id="fd-fight"></p>
-        <div class="swatch" id="fd-swatch" style="height:140px"><span class="hex"></span></div>
+        <div class="swatch" id="fd-swatch" style="height:140px"></div>
         <p class="prompt-line" id="fd-question"></p>
         <div class="choice-row" id="fd-choices"></div>
         <div id="fd-reveal" hidden>
           <p class="call" id="fd-call"></p>
-          <div class="hsl-bars" id="fd-bars"></div>
+          <p class="desc" id="fd-desc"></p>
           <p id="fd-story"></p>
+          <details class="tech">
+            <summary>Technical details</summary>
+            <p id="fd-tech"></p>
+            <div class="hsl-bars" id="fd-bars"></div>
+          </details>
         </div>
       </div>
     </div>
@@ -657,18 +686,39 @@ function judge(d) {
 
 /* --------------------------- SHARED RENDERING ---------------------------- */
 
-/** Paint a dispute onto a .swatch element and its mono readout line. */
-function renderSwatch(swatchEl, readoutEl, c) {
-  const hex = hexOf(c);
-  swatchEl.style.backgroundColor = hex;
-  const label = swatchEl.querySelector(".hex");
-  label.textContent = hex.toUpperCase();
-  label.style.color = labelColorFor(c);
-  if (readoutEl) {
-    // Hex already lives on the swatch; the readout carries the HSL only.
-    readoutEl.textContent =
-      `hsl(${Math.round(c.h)}°, ${Math.round(c.s)}%, ${Math.round(c.l)}%)`;
-  }
+/**
+ * Translate a color into plain language. No HSL, no hex: those live behind
+ * the "Technical details" disclosure for anyone who wants them.
+ * When the color has two fighting names (a dispute), lead with them.
+ */
+function describeColor(c) {
+  const where = c.low && c.high
+    ? `Somewhere between ${c.low} and ${c.high}. `
+    : "";
+  const strength =
+    c.s < 15 ? "Barely any pigment in it" :
+    c.s < 40 ? "Muted and understated" :
+    c.s < 70 ? "A solid dose of color" :
+               "Loud and vivid";
+  const light =
+    c.l < 32 ? "on the dark side" :
+    c.l < 48 ? "a little moody" :
+    c.l < 64 ? "medium brightness" :
+    c.l < 78 ? "bright" :
+               "very pale";
+  return `${where}${strength}, ${light}.`;
+}
+
+/** The mono readout for the Technical details disclosure. */
+function techLine(c) {
+  return `hsl(${Math.round(c.h)}, ${Math.round(c.s)}%, ${Math.round(c.l)}%) · ${hexOf(c).toUpperCase()}`;
+}
+
+/** Paint a color onto a .swatch, its plain description, and (optionally) tech line. */
+function renderSwatch(swatchEl, readoutEl, c, techEl) {
+  swatchEl.style.backgroundColor = hexOf(c);
+  if (readoutEl) readoutEl.textContent = describeColor(c);
+  if (techEl) techEl.textContent = techLine(c);
 }
 
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -753,7 +803,7 @@ function nextRound() {
   $("quiz-round").textContent = `Round ${quiz.round} / ${QUIZ_ROUNDS}`;
   $("quiz-score").textContent = `Matches: ${quiz.matches}`;
   $("quiz-feedback").textContent = "";
-  renderSwatch($("quiz-swatch"), $("quiz-readout"), d);
+  renderSwatch($("quiz-swatch"), $("quiz-readout"), d, $("quiz-tech"));
 
   const choices = $("quiz-choices");
   choices.innerHTML = "";
@@ -881,6 +931,8 @@ function revealFamous(index, chosen) {
   $("fd-call").innerHTML = matched
     ? `You said <span class="win">${escapeHtml(f.answer)}</span>. The referee agrees.`
     : `The referee calls it <span class="win">${escapeHtml(f.answer)}</span>. You said <span class="miss">${escapeHtml(chosen)}</span>.`;
+  $("fd-desc").textContent = describeColor(f);
+  $("fd-tech").textContent = techLine(f);
 
   // H/S/L bars: hue as a fraction of the wheel, sat/light as percents.
   $("fd-bars").innerHTML = [
