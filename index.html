@@ -440,7 +440,7 @@ footer p { margin: 0 0 1.2rem; }
   <div class="hero">
     <span class="eyebrow">The Color Argument Referee</span>
     <h1>Or is it<span class="q">?</span></h1>
-    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. Step into the ring. The referee has instruments and no sympathy.</p>
+    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. The referee has instruments and no sympathy.</p>
   </div>
   <nav role="tablist" aria-label="Ways to fight about color">
     <button class="tab" role="tab" id="tab-quiz" aria-controls="panel-quiz" aria-selected="true">👁 Test Yourself</button>
@@ -908,12 +908,17 @@ const $ = id => document.getElementById(id);
 
 // Warm start: show one real ambiguous color above the start button so a
 // first-time visitor grasps the premise in a glance, before committing.
+// The demo color IS question one: whatever the visitor was just looking
+// at carries straight into the quiz instead of being discarded.
+let pendingDemoDispute = null;
+
 function renderQuizDemo() {
-  const demo = generateDecidedDispute();
-  renderSwatch($("quiz-demo"), $("quiz-demo-readout"), demo);
+  pendingDemoDispute = generateDecidedDispute();
+  renderSwatch($("quiz-demo"), $("quiz-demo-readout"), pendingDemoDispute);
   $("quiz-demo-caption").innerHTML =
-    `Exhibit A. Some people see <strong>${cap(demo.low)}</strong>, ` +
-    `others swear it's <strong>${cap(demo.high)}</strong>. Ten of these are coming for you.`;
+    `Exhibit A. Some people see <strong>${cap(pendingDemoDispute.low)}</strong>, ` +
+    `others swear it's <strong>${cap(pendingDemoDispute.high)}</strong>. ` +
+    `Call it when you're ready. This exact color is question one.`;
 }
 renderQuizDemo();
 
@@ -942,7 +947,10 @@ function startQuiz() {
 function nextRound() {
   quiz.round++;
   quiz.locked = false;
-  quiz.dispute = generateDecidedDispute();
+  // Consume the landing demo as round one (fresh rounds after that, and
+  // reruns start fresh too since the demo is no longer on screen).
+  quiz.dispute = pendingDemoDispute || generateDecidedDispute();
+  pendingDemoDispute = null;
   const d = quiz.dispute;
 
   $("quiz-round").textContent = `Round ${quiz.round} / ${QUIZ_ROUNDS}`;
