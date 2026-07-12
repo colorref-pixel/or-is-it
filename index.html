@@ -657,7 +657,11 @@ const FAMOUS = [
   {
     name: "The Dress", fight: "blue & black vs white & gold",
     options: ["Blue & black", "White & gold"], answer: "Blue & black",
+    // The one two-color exhibit: the photo's washed-out blue plus the lace's
+    // brownish gold. h2/s2/l2 makes the swatch render as a split field.
     h: 222, s: 27, l: 57,
+    h2: 38, s2: 30, l2: 40,
+    desc: "A washed-out blue and a brownish gold, and neither is telling the truth.",
     story: "February 2015. One washed-out photo of a bodycon dress split the internet into two irreconcilable nations overnight. The dress itself was blue and black; your brain's guess about the lighting decided which team you joined. This swatch is the disputed blue from the photo: dim, desaturated, and still starting fights."
   },
   {
@@ -1033,11 +1037,19 @@ const grid = $("famous-grid");
 const famousAnswered = new Set(); // colors the visitor has already called
 let famousMatches = 0;            // times they agreed with the referee
 
+/** Two-color exhibits (The Dress) render as a split field, top and bottom. */
+function famousBackground(f) {
+  if (!f.h2) return hexOf(f);
+  const second = hexOf({ h: f.h2, s: f.s2, l: f.l2 });
+  return `linear-gradient(180deg, ${hexOf(f)} 0 50%, ${second} 50% 100%)`;
+}
+
 FAMOUS.forEach((f, i) => {
   const chip = document.createElement("button");
   chip.className = "famous-chip";
-  chip.style.backgroundColor = hexOf(f);
-  chip.style.color = labelColorFor(f);
+  chip.style.background = famousBackground(f);
+  // The label sits at the chip's bottom edge, so contrast against the lower color.
+  chip.style.color = labelColorFor(f.h2 ? { h: f.h2, s: f.s2, l: f.l2 } : f);
   chip.textContent = f.name;
   chip.setAttribute("aria-expanded", "false");
   chip.addEventListener("click", () => openFamous(i));
@@ -1054,7 +1066,9 @@ function openFamous(index) {
   $("fd-reveal").hidden = true;
   $("fd-name").textContent = f.name;
   $("fd-fight").textContent = "The dispute: " + f.fight;
-  renderSwatch($("fd-swatch"), null, f);
+  // background (not backgroundColor) so split-field exhibits render, and so a
+  // previous entry's gradient never lingers on a single-color one.
+  $("fd-swatch").style.background = famousBackground(f);
   $("fd-question").textContent = "Before the file opens, call it. Which did you see?";
 
   const choices = $("fd-choices");
@@ -1092,20 +1106,27 @@ function revealFamous(index, chosen) {
   $("fd-call").innerHTML = matched
     ? `You said <span class="win">${escapeHtml(f.answer)}</span>. The referee agrees.`
     : `The referee calls it <span class="win">${escapeHtml(f.answer)}</span>. You said <span class="miss">${escapeHtml(chosen)}</span>.`;
-  $("fd-desc").textContent = describeColor(f);
-  $("fd-tech").textContent = techLine(f);
+  $("fd-desc").textContent = f.desc || describeColor(f);
 
-  // H/S/L bars: hue as a fraction of the wheel, sat/light as percents.
-  $("fd-bars").innerHTML = [
-    ["H", f.h / 360 * 100, `${f.h}°`],
-    ["S", f.s, `${f.s}%`],
-    ["L", f.l, `${f.l}%`],
-  ].map(([label, pct, text]) => `
-    <div class="hsl-bar">
-      <span>${label}</span>
-      <div class="track"><div class="fill" style="width:${pct}%"></div></div>
-      <span>${text}</span>
-    </div>`).join("");
+  if (f.h2) {
+    // Two colors, two tech lines; the H/S/L bars would be ambiguous, skip them.
+    $("fd-tech").innerHTML =
+      `${techLine(f)}<br>${techLine({ h: f.h2, s: f.s2, l: f.l2 })}`;
+    $("fd-bars").innerHTML = "";
+  } else {
+    $("fd-tech").textContent = techLine(f);
+    // H/S/L bars: hue as a fraction of the wheel, sat/light as percents.
+    $("fd-bars").innerHTML = [
+      ["H", f.h / 360 * 100, `${f.h}°`],
+      ["S", f.s, `${f.s}%`],
+      ["L", f.l, `${f.l}%`],
+    ].map(([label, pct, text]) => `
+      <div class="hsl-bar">
+        <span>${label}</span>
+        <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+        <span>${text}</span>
+      </div>`).join("");
+  }
   $("fd-story").textContent = f.story;
 }
 </script>
