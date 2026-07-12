@@ -228,103 +228,12 @@ h2 {
 }
 .choice-row .btn { min-width: 10rem; }
 
-/* ---- Name inputs (Settle it) ---- */
-.names {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: center;
-  margin-bottom: 1.3rem;
-}
-.names label {
-  display: flex;
-  flex-direction: column;
-  gap: .3rem;
-  font-family: var(--mono);
-  font-size: .78rem;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--ink-soft);
-}
-.names input {
-  font-family: var(--body);
-  font-size: 1.05rem;
-  padding: .55rem .8rem;
-  border: var(--line);
-  border-radius: 10px;
-  background: #fff;
-  color: var(--ink);
-  width: 11rem;
-}
-.vs {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 1.5rem;
-  color: var(--whistle);
-  padding-bottom: .4rem;
-}
-
 .prompt-line {
   text-align: center;
   font-size: 1.15rem;
   margin: 1.2rem 0 0;
 }
 .prompt-line strong { color: var(--whistle-deep); }
-
-/* ---- Verdict + lean gauge ---- */
-.verdict {
-  text-align: center;
-  margin-top: 1.4rem;
-  padding-top: 1.2rem;
-  border-top: 2px dashed var(--ink-soft);
-}
-.verdict .call {
-  font-family: var(--display);
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: clamp(1.5rem, 5vw, 2.1rem);
-  margin: 0;
-}
-.verdict .call .win { color: var(--whistle); }
-.verdict .snark { color: var(--ink-soft); font-style: italic; margin: .4rem 0 1.1rem; }
-
-.gauge { max-width: 480px; margin: 0 auto; }
-.gauge-labels {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--mono);
-  font-size: .8rem;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  margin-bottom: .35rem;
-}
-.gauge-track {
-  position: relative;
-  height: 18px;
-  border: var(--line);
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(217,72,31,.25), var(--paper-2) 50%, rgba(232,169,57,.35));
-}
-.gauge-track::after {  /* center tick = dead heat */
-  content: "";
-  position: absolute;
-  left: 50%; top: -6px; bottom: -6px;
-  width: 2px;
-  background: var(--ink);
-  opacity: .45;
-}
-.gauge-pin {
-  position: absolute;
-  top: 50%;
-  width: 26px; height: 26px;
-  transform: translate(-50%, -50%);
-  background: var(--ink);
-  border: 3px solid var(--paper-2);
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--ink);
-  transition: left .6s cubic-bezier(.2,.8,.3,1.1);
-}
 
 /* ---- Quiz ---- */
 .scoreline {
@@ -429,9 +338,6 @@ footer p { margin: 0 0 1.2rem; }
 /* ---- Small screens ---- */
 @media (max-width: 560px) {
   .card { padding: 1.1rem; }
-  .names input { width: 100%; }
-  .names label { flex: 1 1 100%; }
-  .vs { display: none; }
   .choice-row .btn { flex: 1 1 100%; }
 }
 
@@ -453,73 +359,28 @@ footer p { margin: 0 0 1.2rem; }
   <div class="hero">
     <span class="eyebrow">The Color Argument Referee</span>
     <h1>Or is it<span class="q">?</span></h1>
-    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. Step into the ring. The referee has HSL values and no sympathy.</p>
+    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. Step into the ring. The referee has instruments and no sympathy.</p>
   </div>
   <nav role="tablist" aria-label="Ways to fight about color">
-    <button class="tab" role="tab" id="tab-settle" aria-controls="panel-settle" aria-selected="true">⚖ Settle It</button>
-    <button class="tab" role="tab" id="tab-quiz" aria-controls="panel-quiz" aria-selected="false">👁 Test Yourself</button>
+    <button class="tab" role="tab" id="tab-quiz" aria-controls="panel-quiz" aria-selected="true">👁 Test Yourself</button>
     <button class="tab" role="tab" id="tab-famous" aria-controls="panel-famous" aria-selected="false">🏆 The Famous Ones</button>
   </nav>
 </header>
 
 <main>
 
-  <!-- ============================ SETTLE IT ============================ -->
-  <section class="panel active" id="panel-settle" role="tabpanel" aria-labelledby="tab-settle">
-    <div class="card">
-      <h2>Settle It</h2>
-      <p class="rules">Two disputants. One indefensible color. One of you calls it; the other is stuck defending the opposite corner. The referee measures where it sits. Loser buys coffee.</p>
-
-      <div id="settle-demo-block">
-        <div class="swatch demo" id="settle-demo" style="height:150px" aria-hidden="true"><span class="hex"></span></div>
-        <p class="readout" id="settle-demo-readout"></p>
-        <p class="prompt-line" id="settle-demo-caption"></p>
-      </div>
-
-      <div class="names">
-        <label>Disputant one
-          <input type="text" id="name-a" placeholder="e.g. Dana" maxlength="20" autocomplete="off">
-        </label>
-        <span class="vs" aria-hidden="true">VS</span>
-        <label>Disputant two
-          <input type="text" id="name-b" placeholder="e.g. Sam" maxlength="20" autocomplete="off">
-        </label>
-      </div>
-
-      <div style="text-align:center">
-        <button class="btn primary big" id="settle-start">Bring out the evidence</button>
-      </div>
-
-      <div id="settle-arena" hidden>
-        <div class="swatch" id="settle-swatch"><span class="hex"></span></div>
-        <p class="readout" id="settle-readout"></p>
-        <p class="prompt-line" id="settle-prompt"></p>
-        <div class="choice-row" id="settle-choices"></div>
-
-        <div class="verdict" id="settle-verdict" hidden>
-          <p class="call" id="settle-call"></p>
-          <p class="snark" id="settle-snark"></p>
-          <div class="gauge">
-            <div class="gauge-labels">
-              <span id="gauge-low"></span><span id="gauge-high"></span>
-            </div>
-            <div class="gauge-track"><div class="gauge-pin" id="gauge-pin"></div></div>
-          </div>
-          <div class="choice-row">
-            <button class="btn" id="settle-rematch">Rematch</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============================ TEST YOURSELF ============================ -->
-  <section class="panel" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+  <section class="panel active" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz">
     <div class="card">
       <h2>Test Yourself</h2>
       <p class="rules">Ten colors, each parked where two names go to war. Call each one. We score you against where the color mathematically leans: the closest thing to a crowd that never blinks.</p>
 
       <div id="quiz-intro" style="text-align:center">
+        <div id="quiz-demo-block">
+          <div class="swatch" id="quiz-demo" style="height:150px" aria-hidden="true"><span class="hex"></span></div>
+          <p class="readout" id="quiz-demo-readout"></p>
+          <p class="prompt-line" id="quiz-demo-caption"></p>
+        </div>
         <button class="btn primary big" id="quiz-start">Start the gauntlet</button>
       </div>
 
@@ -631,7 +492,7 @@ const MIX = { grey: 0.40, brown: 0.10 };
 // degrees for hue, percentage points for sat/light).
 const TOSSUP = { hue: 1.5, sat: 1.5, light: 2 };
 
-// Distance from the boundary at which the gauge pin hits the far edge.
+// Distance from the boundary at which judge()'s lean value saturates at ±1.
 const LEAN_SPAN = { hue: HUE_WOBBLE, sat: 6, light: 8 };
 
 const QUIZ_ROUNDS = 10;
@@ -847,113 +708,20 @@ tabs.forEach((tab, i) => {
 // Match the roving tabindex to the tab selected in the markup on load.
 selectTab(tabs.find(t => t.getAttribute("aria-selected") === "true") || tabs[0]);
 
-/* ----------------------------- SETTLE IT --------------------------------- */
-
-const settle = { dispute: null };
+/* --------------------------- SHARED HELPERS ------------------------------ */
 
 const $ = id => document.getElementById(id);
 
-$("settle-start").addEventListener("click", startBout);
-$("settle-rematch").addEventListener("click", startBout);
-
-// Warm start: show one real ambiguous color up front so a first-time visitor
-// grasps the two-sided premise in a glance, before typing anything.
-function renderSettleDemo() {
+// Warm start: show one real ambiguous color above the start button so a
+// first-time visitor grasps the premise in a glance, before committing.
+function renderQuizDemo() {
   const demo = generateDispute();
-  renderSwatch($("settle-demo"), $("settle-demo-readout"), demo);
-  $("settle-demo-caption").innerHTML =
-    `Exhibit A. One of you sees <strong>${cap(demo.low)}</strong>, ` +
-    `the other swears <strong>${cap(demo.high)}</strong>. Name your corners and let the referee rule.`;
+  renderSwatch($("quiz-demo"), $("quiz-demo-readout"), demo);
+  $("quiz-demo-caption").innerHTML =
+    `Exhibit A. Some people see <strong>${cap(demo.low)}</strong>, ` +
+    `others swear it's <strong>${cap(demo.high)}</strong>. Ten of these are coming for you.`;
 }
-renderSettleDemo();
-
-function disputantNames() {
-  return [
-    $("name-a").value.trim() || "Disputant One",
-    $("name-b").value.trim() || "Disputant Two",
-  ];
-}
-
-function startBout() {
-  settle.dispute = generateDispute();
-  const d = settle.dispute;
-  const [nameA] = disputantNames();
-
-  $("settle-demo-block").hidden = true; // demo has done its job once play starts
-  $("settle-arena").hidden = false;
-  $("settle-verdict").hidden = true;
-  renderSwatch($("settle-swatch"), $("settle-readout"), d);
-
-  $("settle-prompt").innerHTML =
-    `<strong>${escapeHtml(nameA)}</strong>, you saw it first. Call it:`;
-
-  const choices = $("settle-choices");
-  choices.innerHTML = "";
-  // Shuffle which side appears on which button so position leaks nothing.
-  const order = Math.random() < 0.5 ? [d.low, d.high] : [d.high, d.low];
-  order.forEach(name => {
-    const btn = document.createElement("button");
-    btn.className = "btn";
-    btn.textContent = cap(name);
-    btn.addEventListener("click", () => ruleOnBout(name));
-    choices.appendChild(btn);
-  });
-
-  $("settle-start").textContent = "New dispute";
-  $("settle-arena").scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-// Snark pools — the referee does not do gracious.
-const WIN_LINES = [
-  "{loser} defended {loserClaim} with real conviction. Conviction is not evidence.",
-  "The pixels have spoken, and they are not on {loser}'s side.",
-  "{winner} gets the point. {loser} gets a valuable lesson about certainty.",
-  "Science is on {winner}'s side today. {loser}, science asks that you stop emailing.",
-  "That's a point for {winner}. {loser}, your monitor was never the problem.",
-];
-const TOSSUP_LINES = [
-  "Dead center. Nobody wins. This is somehow worse for both of you.",
-  "It is mathematically both. Please find something better to fight about.",
-  "The referee measured twice. It's a coin toss wearing a color.",
-];
-
-function ruleOnBout(claimed) {
-  const d = settle.dispute;
-  const { verdict, lean } = judge(d);
-  const [nameA, nameB] = disputantNames();
-  const other = claimed === d.low ? d.high : d.low;
-
-  // Disputant A claimed `claimed`; B is stuck with the other corner.
-  const aWins = verdict === claimed;
-  const winner = aWins ? nameA : nameB;
-  const loser  = aWins ? nameB : nameA;
-  const loserClaim = aWins ? other : claimed;
-
-  $("settle-verdict").hidden = false;
-  $("settle-choices").innerHTML = "";
-  $("settle-prompt").innerHTML =
-    `${escapeHtml(nameA)} called <strong>${cap(claimed)}</strong>. ` +
-    `${escapeHtml(nameB)} inherits <strong>${cap(other)}</strong>. The referee checks the tape…`;
-
-  if (verdict === "toss-up") {
-    $("settle-call").innerHTML = `It's a <span class="win">toss-up</span>`;
-    $("settle-snark").textContent = pick(TOSSUP_LINES);
-  } else {
-    $("settle-call").innerHTML =
-      `The color leans <span class="win">${cap(verdict)}</span>. Point, ${escapeHtml(winner)}`;
-    $("settle-snark").textContent = pick(WIN_LINES)
-      .replaceAll("{winner}", winner)
-      .replaceAll("{loser}", loser)
-      .replaceAll("{loserClaim}", loserClaim);
-  }
-
-  // Gauge: low name on the left, high name on the right, pin at the lean.
-  $("gauge-low").textContent = cap(d.low);
-  $("gauge-high").textContent = cap(d.high);
-  requestAnimationFrame(() => {
-    $("gauge-pin").style.left = `${50 + lean * 46}%`; // 46 keeps the pin inside the track
-  });
-}
+renderQuizDemo();
 
 function escapeHtml(s) {
   return s.replace(/[&<>"']/g, ch =>
