@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Or Is It? — The Color Argument Referee</title>
+<meta name="description" content="Settle pointless color arguments forever. Is it blue or grey? Teal or green? Or Is It? generates genuinely ambiguous colors, judges them, and declares a winner. Nobody wins gracefully.">
+<style>
+/* ==========================================================================
+   OR IS IT? — styles
+   Direction: "referee for pointless disputes" — warm paper, hard ink lines,
+   whistle-red accent, chunky uppercase display type, offset-shadow cards.
+   ========================================================================== */
+
+:root {
+  --paper:   #f6eddc;   /* warm cream background */
+  --paper-2: #fffbf0;   /* card surface */
+  --ink:     #211c14;   /* near-black warm ink */
+  --ink-soft:#5c5240;   /* secondary text */
+  --whistle: #d9481f;   /* referee-whistle red-orange accent */
+  --whistle-deep: #a83112;
+  --gold:    #e8a939;   /* medal gold, small accents */
+  --line: 2px solid var(--ink);
+  --shadow: 5px 5px 0 var(--ink);
+  --radius: 14px;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --display: "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", Impact, system-ui, sans-serif;
+  --body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  /* faint paper grain via layered gradients — no external assets */
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(217,72,31,.05), transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(232,169,57,.07), transparent 45%);
+  color: var(--ink);
+  font-family: var(--body);
+  line-height: 1.5;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 3px dashed var(--whistle);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---- Referee stripes (header + footer trim) ---- */
+.stripes {
+  height: 14px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--ink) 0 12px,
+    var(--paper) 12px 24px
+  );
+  border-bottom: var(--line);
+}
+footer .stripes { border-bottom: 0; border-top: var(--line); }
+
+/* ---- Hero ---- */
+header { text-align: center; padding: 0 1rem; }
+.hero { max-width: 880px; margin: 0 auto; padding: 2.6rem 0 1.6rem; }
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .78rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--paper-2);
+  background: var(--ink);
+  padding: .35rem .9rem;
+  border-radius: 999px;
+  transform: rotate(-1.2deg);
+}
+
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3.4rem, 13vw, 7.5rem);
+  line-height: .92;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  margin: .35em 0 .15em;
+}
+h1 .q { color: var(--whistle); font-style: italic; }
+
+.tagline {
+  font-size: clamp(1rem, 2.6vw, 1.2rem);
+  color: var(--ink-soft);
+  max-width: 34rem;
+  margin: 0 auto;
+  font-style: italic;
+}
+
+/* ---- Tabs ---- */
+nav[role="tablist"] {
+  display: flex;
+  justify-content: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+  padding: 1.4rem 1rem .4rem;
+}
+
+.tab {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: .6rem 1.3rem;
+  background: var(--paper-2);
+  color: var(--ink);
+  border: var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.tab:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.tab[aria-selected="true"] {
+  background: var(--whistle);
+  color: #fff8ee;
+  transform: translate(2px,2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+/* ---- Panels ---- */
+main { max-width: 880px; margin: 0 auto; padding: 1.2rem 1rem 3.5rem; }
+
+.panel { display: none; }
+.panel.active { display: block; animation: rise .35s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.card {
+  background: var(--paper-2);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.6rem;
+  margin-top: 1.4rem;
+}
+
+h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+  margin: 0 0 .3rem;
+  letter-spacing: .01em;
+}
+.rules { color: var(--ink-soft); margin: 0 0 1.2rem; font-size: .98rem; }
+
+/* ---- The big swatch ---- */
+.swatch {
+  position: relative;
+  height: clamp(190px, 34vw, 280px);
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 1rem 1.2rem;
+  transition: background-color .6s ease;
+}
+.swatch .hex {
+  font-family: var(--mono);
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: .06em;
+  user-select: all;
+}
+
+.readout {
+  font-family: var(--mono);
+  font-size: .85rem;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: .7rem 0 0;
+  letter-spacing: .04em;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .75rem 1.6rem;
+  border: var(--line);
+  border-radius: 12px;
+  background: var(--gold);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover  { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--ink); }
+.btn:active { transform: translate(3px,3px);   box-shadow: 1px 1px 0 var(--ink); }
+.btn.primary { background: var(--whistle); color: #fff8ee; }
+.btn.big { font-size: 1.35rem; padding: .9rem 2rem; }
+
+.choice-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+.choice-row .btn { min-width: 10rem; }
+
+/* ---- Name inputs (Settle it) ---- */
+.names {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 1.3rem;
+}
+.names label {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  font-family: var(--mono);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--ink-soft);
+}
+.names input {
+  font-family: var(--body);
+  font-size: 1.05rem;
+  padding: .55rem .8rem;
+  border: var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  width: 11rem;
+}
+.vs {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--whistle);
+  padding-bottom: .4rem;
+}
+
+.prompt-line {
+  text-align: center;
+  font-size: 1.15rem;
+  margin: 1.2rem 0 0;
+}
+.prompt-line strong { color: var(--whistle-deep); }
+
+/* ---- Verdict + lean gauge ---- */
+.verdict {
+  text-align: center;
+  margin-top: 1.4rem;
+  padding-top: 1.2rem;
+  border-top: 2px dashed var(--ink-soft);
+}
+.verdict .call {
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  margin: 0;
+}
+.verdict .call .win { color: var(--whistle); }
+.verdict .snark { color: var(--ink-soft); font-style: italic; margin: .4rem 0 1.1rem; }
+
+.gauge { max-width: 480px; margin: 0 auto; }
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: .35rem;
+}
+.gauge-track {
+  position: relative;
+  height: 18px;
+  border: var(--line);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(217,72,31,.25), var(--paper-2) 50%, rgba(232,169,57,.35));
+}
+.gauge-track::after {  /* center tick = dead heat */
+  content: "";
+  position: absolute;
+  left: 50%; top: -6px; bottom: -6px;
+  width: 2px;
+  background: var(--ink);
+  opacity: .45;
+}
+.gauge-pin {
+  position: absolute;
+  top: 50%;
+  width: 26px; height: 26px;
+  transform: translate(-50%, -50%);
+  background: var(--ink);
+  border: 3px solid var(--paper-2);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--ink);
+  transition: left .6s cubic-bezier(.2,.8,.3,1.1);
+}
+
+/* ---- Quiz ---- */
+.scoreline {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink-soft);
+  margin-bottom: .8rem;
+}
+.quiz-feedback {
+  text-align: center;
+  min-height: 1.6em;
+  margin: 1rem 0 0;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.quiz-final { text-align: center; }
+.quiz-final .score {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3rem, 10vw, 5rem);
+  line-height: 1;
+  margin: .5rem 0 .2rem;
+  color: var(--whistle);
+}
+.quiz-final .title {
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  margin: 0 0 .3rem;
+}
+
+/* ---- Famous ones ---- */
+.famous-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.famous-chip {
+  border: var(--line);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 0 var(--ink);
+  height: 110px;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: .6rem .7rem;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.famous-chip:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink); }
+.famous-chip[aria-expanded="true"] { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+
+.famous-detail { margin-top: 1.4rem; }
+.famous-detail h3 {
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  margin: 0;
+}
+.famous-detail .fight {
+  font-family: var(--mono);
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--whistle-deep);
+  margin: .2rem 0 .8rem;
+}
+.hsl-bars { display: grid; gap: .55rem; margin: 1rem 0; max-width: 460px; }
+.hsl-bar { display: grid; grid-template-columns: 2.2rem 1fr 4.5rem; align-items: center; gap: .7rem; font-family: var(--mono); font-size: .82rem; }
+.hsl-bar .track { height: 12px; border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); overflow: hidden; }
+.hsl-bar .fill { height: 100%; background: var(--whistle); transition: width .5s ease; }
+
+footer {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: .85rem;
+  padding: 1.2rem 1rem 0;
+}
+footer p { margin: 0 0 1.2rem; }
+
+/* ---- Small screens ---- */
+@media (max-width: 560px) {
+  .card { padding: 1.1rem; }
+  .names input { width: 100%; }
+  .names label { flex: 1 1 100%; }
+  .vs { display: none; }
+  .choice-row .btn { flex: 1 1 100%; }
+}
+
+/* ---- Reduced motion: kill every transition/animation ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001s !important;
+    transition-duration: .001s !important;
+  }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="stripes" aria-hidden="true"></div>
+
+<header>
+  <div class="hero">
+    <span class="eyebrow">The Color Argument Referee</span>
+    <h1>Or is it<span class="q">?</span></h1>
+    <p class="tagline">It's obviously blue. It's clearly grey. You're both so sure. Step into the ring — the referee has HSL values and no sympathy.</p>
+  </div>
+  <nav role="tablist" aria-label="Ways to fight about color">
+    <button class="tab" role="tab" id="tab-settle" aria-controls="panel-settle" aria-selected="true">⚖ Settle It</button>
+    <button class="tab" role="tab" id="tab-quiz" aria-controls="panel-quiz" aria-selected="false">👁 Test Yourself</button>
+    <button class="tab" role="tab" id="tab-famous" aria-controls="panel-famous" aria-selected="false">🏆 The Famous Ones</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============================ SETTLE IT ============================ -->
+  <section class="panel active" id="panel-settle" role="tabpanel" aria-labelledby="tab-settle">
+    <div class="card">
+      <h2>Settle It</h2>
+      <p class="rules">Two disputants. One indefensible color. One of you calls it; the other is stuck defending the opposite corner. The referee measures where it actually sits. Loser buys coffee.</p>
+
+      <div class="names">
+        <label>Disputant one
+          <input type="text" id="name-a" placeholder="e.g. Dana" maxlength="20" autocomplete="off">
+        </label>
+        <span class="vs" aria-hidden="true">VS</span>
+        <label>Disputant two
+          <input type="text" id="name-b" placeholder="e.g. Sam" maxlength="20" autocomplete="off">
+        </label>
+      </div>
+
+      <div style="text-align:center">
+        <button class="btn primary big" id="settle-start">Bring out the evidence</button>
+      </div>
+
+      <div id="settle-arena" hidden>
+        <div class="swatch" id="settle-swatch"><span class="hex"></span></div>
+        <p class="readout" id="settle-readout"></p>
+        <p class="prompt-line" id="settle-prompt"></p>
+        <div class="choice-row" id="settle-choices"></div>
+
+        <div class="verdict" id="settle-verdict" hidden>
+          <p class="call" id="settle-call"></p>
+          <p class="snark" id="settle-snark"></p>
+          <div class="gauge">
+            <div class="gauge-labels">
+              <span id="gauge-low"></span><span id="gauge-high"></span>
+            </div>
+            <div class="gauge-track"><div class="gauge-pin" id="gauge-pin"></div></div>
+          </div>
+          <div class="choice-row">
+            <button class="btn" id="settle-rematch">Rematch</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ TEST YOURSELF ============================ -->
+  <section class="panel" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+    <div class="card">
+      <h2>Test Yourself</h2>
+      <p class="rules">Ten colors, each parked exactly where two names go to war. Call each one. We score you against where the color mathematically leans — the closest thing to a crowd that never blinks.</p>
+
+      <div id="quiz-intro" style="text-align:center">
+        <button class="btn primary big" id="quiz-start">Start the gauntlet</button>
+      </div>
+
+      <div id="quiz-arena" hidden>
+        <div class="scoreline">
+          <span id="quiz-round">Round 1 / 10</span>
+          <span id="quiz-score">Matches: 0</span>
+        </div>
+        <div class="swatch" id="quiz-swatch"><span class="hex"></span></div>
+        <p class="readout" id="quiz-readout"></p>
+        <div class="choice-row" id="quiz-choices"></div>
+        <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <div id="quiz-final" class="quiz-final" hidden>
+        <p class="score" id="quiz-final-score"></p>
+        <p class="title" id="quiz-final-title"></p>
+        <p class="rules" id="quiz-final-blurb" style="max-width:32rem;margin:0 auto 1.2rem"></p>
+        <button class="btn primary" id="quiz-again">Run it back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ THE FAMOUS ONES ============================ -->
+  <section class="panel" id="panel-famous" role="tabpanel" aria-labelledby="tab-famous" hidden>
+    <div class="card">
+      <h2>The Famous Ones</h2>
+      <p class="rules">Historic bouts. Colors with a body count of friendships. Tap a swatch to read the file.</p>
+      <div class="famous-grid" id="famous-grid"></div>
+
+      <div class="famous-detail" id="famous-detail" hidden>
+        <h3 id="fd-name"></h3>
+        <p class="fight" id="fd-fight"></p>
+        <div class="swatch" id="fd-swatch" style="height:140px"><span class="hex"></span></div>
+        <div class="hsl-bars" id="fd-bars"></div>
+        <p id="fd-story"></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>No color was harmed. Several friendships were. · <em>Or Is It?</em> renders everything in your browser — nothing is uploaded, tracked, or stored.</p>
+  <div class="stripes" aria-hidden="true"></div>
+</footer>
+
+<script>
+"use strict";
+
+/* ==========================================================================
+   OR IS IT? — the engine
+   Everything tweakable lives in the CONFIG block below. The generator never
+   picks random colors: every color is manufactured to sit on a boundary
+   between two named color regions, so it is guaranteed to be arguable.
+   ========================================================================== */
+
+/* ----------------------------- CONFIG ----------------------------------- */
+
+// Hue boundaries where two names fight. `low` owns hues below `hue`,
+// `high` owns hues above it. sat/light ranges keep each zone looking like
+// a "real" version of those colors (e.g. yellows need to stay light).
+const HUE_BOUNDARIES = [
+  { hue:  22, low: "red",    high: "orange", sat: [65, 90], light: [46, 56] },
+  { hue:  52, low: "yellow", high: "green",  sat: [60, 88], light: [48, 60] },
+  { hue: 172, low: "green",  high: "teal",   sat: [45, 75], light: [36, 52] },
+  { hue: 200, low: "teal",   high: "blue",   sat: [42, 75], light: [42, 58] },
+  { hue: 255, low: "blue",   high: "purple", sat: [45, 75], light: [46, 62] },
+  { hue: 290, low: "purple", high: "pink",   sat: [45, 75], light: [52, 66] },
+  { hue: 330, low: "pink",   high: "red",    sat: [55, 85], light: [50, 62] },
+];
+const HUE_WOBBLE = 8; // generate within ±8° of the boundary — real toss-up land
+
+// The signature dispute: "is that grey, or is it <color>?"
+// Saturation below satBoundary reads grey; above it, the hue name wins.
+const GREY_AXIS = {
+  satBoundary: 14,
+  satRange: [8, 20],
+  lightRange: [42, 68],
+  hues: [
+    { hue: 220, name: "blue"   },
+    { hue: 150, name: "green"  },
+    { hue: 270, name: "purple" },
+    { hue: 185, name: "teal"   },
+    { hue: 345, name: "pink"   },
+  ],
+};
+
+// Brown is just dark, muted orange — so brown/orange is a LIGHTNESS fight.
+// Below lightBoundary the color reads brown; above it, orange.
+const BROWN_AXIS = {
+  lightBoundary: 33,
+  hueRange: [22, 38],
+  satRange: [42, 65],
+  lightRange: [25, 41],
+  low: "brown", high: "orange",
+};
+
+// Dispute mix: how often each axis comes up. Remainder goes to hue boundaries.
+const MIX = { grey: 0.40, brown: 0.10 };
+
+// How close to the boundary counts as a genuine dead heat (per axis unit:
+// degrees for hue, percentage points for sat/light).
+const TOSSUP = { hue: 2.5, sat: 1.5, light: 2 };
+
+// Distance from the boundary at which the gauge pin hits the far edge.
+const LEAN_SPAN = { hue: HUE_WOBBLE, sat: 6, light: 8 };
+
+const QUIZ_ROUNDS = 10;
+
+// Curated hall of fame. Add your own bouts here.
+const FAMOUS = [
+  {
+    name: "The Dress", fight: "blue & black vs white & gold",
+    h: 222, s: 27, l: 57,
+    story: "February 2015. One washed-out photo of a bodycon dress split the internet into two irreconcilable nations overnight. The dress itself was blue and black; your brain's guess about the lighting decided which team you joined. This swatch is the disputed blue from the photo — dim, desaturated, and still starting fights."
+  },
+  {
+    name: "Periwinkle", fight: "blue vs purple",
+    h: 240, s: 65, l: 76,
+    story: "The crayon that launched a thousand playground arguments. Periwinkle sits at hue 240 — the exact seam where blue starts flirting with violet. Crayola calls it blue. Pantone leans lavender. Your aunt insists it's lilac. Everyone is a little bit right, which is the worst possible outcome."
+  },
+  {
+    name: "Olive", fight: "green vs yellow vs brown",
+    h: 60, s: 45, l: 32,
+    story: "A three-way brawl. Olive is technically dark yellow (hue 60), but nobody has ever pointed at an olive and said 'nice yellow.' Darken yellow and your brain files it under green or brown depending on its mood. The only color whose name is a food because no color word survived contact with it."
+  },
+  {
+    name: "Teal vs Turquoise", fight: "the cyan civil war",
+    h: 174, s: 62, l: 45,
+    story: "Both live in the 170–180° cyan zone; the difference is vibes. Turquoise is brighter and leans green like the gemstone; teal is darker and moodier like the duck it's named after. Interior designers have ended long partnerships over which one the sofa is."
+  },
+  {
+    name: "Salmon", fight: "pink vs orange",
+    h: 14, s: 85, l: 71,
+    story: "Hue 14 is firmly orange territory, but crank the lightness and suddenly everyone says pink. Salmon is the proof that 'pink' isn't a hue at all — it's what your brain calls warm colors that got pale. The fish, for the record, declined to comment."
+  },
+  {
+    name: "The Tennis Ball", fight: "green vs yellow",
+    h: 68, s: 85, l: 55,
+    story: "Officially 'optic yellow,' invented in 1972 so TV viewers could see the ball. Roger Federer says green. The International Tennis Federation says yellow. At hue 68 it is chartreuse, the no-man's-land between them — engineered to be visible to everyone and nameable by no one."
+  },
+  {
+    name: "Space Grey", fight: "grey vs blue",
+    h: 215, s: 11, l: 55,
+    story: "Every laptop lid ever argued about at a coffee shop. At 11% saturation there is technically blue in there, and 'technically' is exactly the word that ruins friendships. Under warm light it's grey, under a cool window it's blue, and under no circumstances will either of you drop it."
+  },
+];
+
+/* ------------------------- COLOR MATH HELPERS ---------------------------- */
+
+/** HSL (h 0–360, s/l 0–100) → RGB (each 0–255). */
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [f(0), f(8), f(4)].map(v => Math.round(v * 255));
+}
+
+/** RGB (0–255 each) → HSL (h 0–360, s/l 0–100). Kept for tinkering/console use. */
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h = (h * 60 + 360) % 360;
+  }
+  const l = (max + min) / 2;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+}
+
+/** RGB → "#rrggbb". */
+function rgbToHex(r, g, b) {
+  return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+}
+
+/** "#rrggbb" → [r, g, b]. */
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace("#", ""), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+const hexOf = c => rgbToHex(...hslToRgb(c.h, c.s, c.l));
+
+/** Pick black or white label text based on WCAG relative luminance. */
+function labelColorFor(c) {
+  const [r, g, b] = hslToRgb(c.h, c.s, c.l).map(v => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum > 0.4 ? "#211c14" : "#fff8ee";
+}
+
+const rand = (min, max) => min + Math.random() * (max - min);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/* --------------------------- THE GENERATOR ------------------------------- */
+
+/**
+ * Manufacture a dispute: a color engineered to sit near the boundary
+ * between two names, plus everything judge() needs to rule on it.
+ *
+ * Returns { h, s, l, axis, boundary, low, high } where:
+ *   axis     — "hue" | "sat" | "light": the dimension the two names fight on
+ *   boundary — the value on that axis where ownership flips
+ *   low      — name owning values below the boundary
+ *   high     — name owning values above it
+ */
+function generateDispute() {
+  const roll = Math.random();
+
+  if (roll < MIX.grey) {
+    // Grey-axis dispute: a hued base drained to 8–20% saturation.
+    const base = pick(GREY_AXIS.hues);
+    return {
+      h: (base.hue + rand(-10, 10) + 360) % 360,
+      s: rand(...GREY_AXIS.satRange),
+      l: rand(...GREY_AXIS.lightRange),
+      axis: "sat",
+      boundary: GREY_AXIS.satBoundary,
+      low: "grey",
+      high: base.name,
+    };
+  }
+
+  if (roll < MIX.grey + MIX.brown) {
+    // Brown/orange: same hue family, the fight is over lightness.
+    return {
+      h: rand(...BROWN_AXIS.hueRange),
+      s: rand(...BROWN_AXIS.satRange),
+      l: rand(...BROWN_AXIS.lightRange),
+      axis: "light",
+      boundary: BROWN_AXIS.lightBoundary,
+      low: BROWN_AXIS.low,
+      high: BROWN_AXIS.high,
+    };
+  }
+
+  // Hue-boundary dispute: land within ±HUE_WOBBLE degrees of a seam.
+  const b = pick(HUE_BOUNDARIES);
+  return {
+    h: (b.hue + rand(-HUE_WOBBLE, HUE_WOBBLE) + 360) % 360,
+    s: rand(...b.sat),
+    l: rand(...b.light),
+    axis: "hue",
+    boundary: b.hue,
+    low: b.low,
+    high: b.high,
+  };
+}
+
+/* ----------------------------- THE JUDGE --------------------------------- */
+
+/**
+ * Rule on a dispute. Measures how far the color sits from the boundary
+ * along the contested axis.
+ *
+ * Returns {
+ *   verdict — the winning name, or "toss-up" if within TOSSUP of dead center
+ *   lean    — -1..1 (negative = toward `low`, positive = toward `high`)
+ *   margin  — absolute distance from the boundary, in axis units
+ * }
+ */
+function judge(d) {
+  const value = d.axis === "hue" ? d.h : d.axis === "sat" ? d.s : d.l;
+  let delta = value - d.boundary;
+  // Hue wraps at 360 — take the short way around (matters near red/pink).
+  if (d.axis === "hue") {
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+  }
+  const margin = Math.abs(delta);
+  const lean = Math.max(-1, Math.min(1, delta / LEAN_SPAN[d.axis]));
+  const verdict = margin < TOSSUP[d.axis] ? "toss-up" : (delta < 0 ? d.low : d.high);
+  return { verdict, lean, margin };
+}
+
+/* --------------------------- SHARED RENDERING ---------------------------- */
+
+/** Paint a dispute onto a .swatch element and its mono readout line. */
+function renderSwatch(swatchEl, readoutEl, c) {
+  const hex = hexOf(c);
+  swatchEl.style.backgroundColor = hex;
+  const label = swatchEl.querySelector(".hex");
+  label.textContent = hex.toUpperCase();
+  label.style.color = labelColorFor(c);
+  if (readoutEl) {
+    readoutEl.textContent =
+      `hsl(${Math.round(c.h)}°, ${Math.round(c.s)}%, ${Math.round(c.l)}%) · ${hex.toUpperCase()}`;
+  }
+}
+
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* ------------------------------- TABS ------------------------------------ */
+
+const tabs = [...document.querySelectorAll('[role="tab"]')];
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => {
+      const on = t === tab;
+      t.setAttribute("aria-selected", on);
+      const panel = document.getElementById(t.getAttribute("aria-controls"));
+      panel.hidden = !on;
+      panel.classList.toggle("active", on);
+    });
+  });
+});
+
+/* ----------------------------- SETTLE IT --------------------------------- */
+
+const settle = { dispute: null };
+
+const $ = id => document.getElementById(id);
+
+$("settle-start").addEventListener("click", startBout);
+$("settle-rematch").addEventListener("click", startBout);
+
+function disputantNames() {
+  return [
+    $("name-a").value.trim() || "Disputant One",
+    $("name-b").value.trim() || "Disputant Two",
+  ];
+}
+
+function startBout() {
+  settle.dispute = generateDispute();
+  const d = settle.dispute;
+  const [nameA] = disputantNames();
+
+  $("settle-arena").hidden = false;
+  $("settle-verdict").hidden = true;
+  renderSwatch($("settle-swatch"), $("settle-readout"), d);
+
+  $("settle-prompt").innerHTML =
+    `<strong>${escapeHtml(nameA)}</strong>, you saw it first. Call it:`;
+
+  const choices = $("settle-choices");
+  choices.innerHTML = "";
+  // Shuffle which side appears on which button so position leaks nothing.
+  const order = Math.random() < 0.5 ? [d.low, d.high] : [d.high, d.low];
+  order.forEach(name => {
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = cap(name);
+    btn.addEventListener("click", () => ruleOnBout(name));
+    choices.appendChild(btn);
+  });
+
+  $("settle-start").textContent = "New dispute";
+  $("settle-arena").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+// Snark pools — the referee does not do gracious.
+const WIN_LINES = [
+  "{loser} defended {loserClaim} with real conviction. Conviction is not evidence.",
+  "The pixels have spoken, and they are not on {loser}'s side.",
+  "{winner} gets the point. {loser} gets a valuable lesson about certainty.",
+  "Science is on {winner}'s side today. {loser}, science asks that you stop emailing.",
+  "That's a point for {winner}. {loser}, your monitor was never the problem.",
+];
+const TOSSUP_LINES = [
+  "Dead center. Nobody wins. This is somehow worse for both of you.",
+  "It is mathematically both. Please find something better to fight about.",
+  "The referee measured twice. It's a coin toss wearing a color.",
+];
+
+function ruleOnBout(claimed) {
+  const d = settle.dispute;
+  const { verdict, lean } = judge(d);
+  const [nameA, nameB] = disputantNames();
+  const other = claimed === d.low ? d.high : d.low;
+
+  // Disputant A claimed `claimed`; B is stuck with the other corner.
+  const aWins = verdict === claimed;
+  const winner = aWins ? nameA : nameB;
+  const loser  = aWins ? nameB : nameA;
+  const loserClaim = aWins ? other : claimed;
+
+  $("settle-verdict").hidden = false;
+  $("settle-choices").innerHTML = "";
+  $("settle-prompt").innerHTML =
+    `${escapeHtml(nameA)} called <strong>${cap(claimed)}</strong>. ` +
+    `${escapeHtml(nameB)} inherits <strong>${cap(other)}</strong>. The referee checks the tape…`;
+
+  if (verdict === "toss-up") {
+    $("settle-call").innerHTML = `It's a <span class="win">toss-up</span>`;
+    $("settle-snark").textContent = pick(TOSSUP_LINES);
+  } else {
+    $("settle-call").innerHTML =
+      `The color leans <span class="win">${cap(verdict)}</span> — point, ${escapeHtml(winner)}`;
+    $("settle-snark").textContent = pick(WIN_LINES)
+      .replaceAll("{winner}", winner)
+      .replaceAll("{loser}", loser)
+      .replaceAll("{loserClaim}", loserClaim);
+  }
+
+  // Gauge: low name on the left, high name on the right, pin at the lean.
+  $("gauge-low").textContent = cap(d.low);
+  $("gauge-high").textContent = cap(d.high);
+  requestAnimationFrame(() => {
+    $("gauge-pin").style.left = `${50 + lean * 46}%`; // 46 keeps the pin inside the track
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, ch =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+/* ---------------------------- TEST YOURSELF ------------------------------ */
+
+const quiz = { round: 0, matches: 0, dispute: null, locked: false };
+
+$("quiz-start").addEventListener("click", startQuiz);
+$("quiz-again").addEventListener("click", startQuiz);
+
+function startQuiz() {
+  quiz.round = 0;
+  quiz.matches = 0;
+  $("quiz-intro").hidden = true;
+  $("quiz-final").hidden = true;
+  $("quiz-arena").hidden = false;
+  nextRound();
+}
+
+function nextRound() {
+  quiz.round++;
+  quiz.locked = false;
+  quiz.dispute = generateDispute();
+  const d = quiz.dispute;
+
+  $("quiz-round").textContent = `Round ${quiz.round} / ${QUIZ_ROUNDS}`;
+  $("quiz-score").textContent = `Matches: ${quiz.matches}`;
+  $("quiz-feedback").textContent = "";
+  renderSwatch($("quiz-swatch"), $("quiz-readout"), d);
+
+  const choices = $("quiz-choices");
+  choices.innerHTML = "";
+  const order = Math.random() < 0.5 ? [d.low, d.high] : [d.high, d.low];
+  order.forEach(name => {
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = cap(name);
+    btn.addEventListener("click", () => answerRound(name));
+    choices.appendChild(btn);
+  });
+}
+
+function answerRound(chosen) {
+  if (quiz.locked) return;
+  quiz.locked = true;
+
+  const { verdict } = judge(quiz.dispute);
+  // A toss-up has no wrong answer — the crowd couldn't call it either.
+  const matched = verdict === "toss-up" || verdict === chosen;
+  if (matched) quiz.matches++;
+
+  $("quiz-score").textContent = `Matches: ${quiz.matches}`;
+  $("quiz-feedback").textContent =
+    verdict === "toss-up"
+      ? `That one was a genuine toss-up. Free point — even the math shrugged.`
+      : matched
+        ? `Agreed. It leans ${verdict}.`
+        : `The color leans ${verdict}. You said ${chosen}. Someone's drifting.`;
+
+  // Let the feedback breathe, then move on (or wrap up).
+  setTimeout(() => {
+    if (quiz.round >= QUIZ_ROUNDS) endQuiz();
+    else nextRound();
+  }, 1100);
+}
+
+// Score tiers: [minimum matches, title, blurb]
+const QUIZ_TIERS = [
+  [9, "Calibrated. Insufferably so.",
+      "You see what the math sees. You are the friend everyone secretly texts a screenshot to. Never let them forget it."],
+  [7, "Reliable witness.",
+      "Your testimony would hold up in color court. The occasional miss keeps you humble, which is more than we can say for most."],
+  [5, "A coin with opinions.",
+      "Half the time you agree with the numbers, half the time you freelance. Bold. Statistically indistinguishable from guessing, but bold."],
+  [3, "Your monitor is fine. This is on you.",
+      "You didn't just disagree with the crowd — you built a worldview out of it. We admire the commitment. We question the results."],
+  [0, "Legally, we can't let you name paint.",
+      "An extraordinary run. You saw teal and said pink. Somewhere, a color scientist felt a chill and didn't know why."],
+];
+
+function endQuiz() {
+  $("quiz-arena").hidden = true;
+  $("quiz-final").hidden = false;
+  $("quiz-final-score").textContent = `${quiz.matches}/${QUIZ_ROUNDS}`;
+  const [, title, blurb] = QUIZ_TIERS.find(([min]) => quiz.matches >= min);
+  $("quiz-final-title").textContent = title;
+  $("quiz-final-blurb").textContent = blurb;
+}
+
+/* --------------------------- THE FAMOUS ONES ------------------------------ */
+
+const grid = $("famous-grid");
+FAMOUS.forEach((f, i) => {
+  const chip = document.createElement("button");
+  chip.className = "famous-chip";
+  chip.style.backgroundColor = hexOf(f);
+  chip.style.color = labelColorFor(f);
+  chip.textContent = f.name;
+  chip.setAttribute("aria-expanded", "false");
+  chip.addEventListener("click", () => showFamous(i));
+  grid.appendChild(chip);
+});
+
+function showFamous(index) {
+  const f = FAMOUS[index];
+  [...grid.children].forEach((c, i) =>
+    c.setAttribute("aria-expanded", String(i === index)));
+
+  $("famous-detail").hidden = false;
+  $("fd-name").textContent = f.name;
+  $("fd-fight").textContent = "The fight: " + f.fight;
+  renderSwatch($("fd-swatch"), null, f);
+  $("fd-story").textContent = f.story;
+
+  // H/S/L bars — hue shown as a fraction of the wheel, sat/light as percents.
+  $("fd-bars").innerHTML = [
+    ["H", f.h / 360 * 100, `${f.h}°`],
+    ["S", f.s, `${f.s}%`],
+    ["L", f.l, `${f.l}%`],
+  ].map(([label, pct, text]) => `
+    <div class="hsl-bar">
+      <span>${label}</span>
+      <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+      <span>${text}</span>
+    </div>`).join("");
+
+  $("famous-detail").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+</script>
+</body>
+</html>
