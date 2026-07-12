@@ -461,6 +461,12 @@ footer p { margin: 0 0 1.2rem; }
       <h2>Settle It</h2>
       <p class="rules">Two disputants. One indefensible color. One of you calls it; the other is stuck defending the opposite corner. The referee measures where it sits. Loser buys coffee.</p>
 
+      <div id="settle-demo-block">
+        <div class="swatch demo" id="settle-demo" style="height:150px" aria-hidden="true"><span class="hex"></span></div>
+        <p class="readout" id="settle-demo-readout"></p>
+        <p class="prompt-line" id="settle-demo-caption"></p>
+      </div>
+
       <div class="names">
         <label>Disputant one
           <input type="text" id="name-a" placeholder="e.g. Dana" maxlength="20" autocomplete="off">
@@ -808,6 +814,17 @@ const $ = id => document.getElementById(id);
 $("settle-start").addEventListener("click", startBout);
 $("settle-rematch").addEventListener("click", startBout);
 
+// Warm start: show one real ambiguous color up front so a first-time visitor
+// grasps the two-sided premise in a glance, before typing anything.
+function renderSettleDemo() {
+  const demo = generateDispute();
+  renderSwatch($("settle-demo"), $("settle-demo-readout"), demo);
+  $("settle-demo-caption").innerHTML =
+    `Exhibit A. One of you sees <strong>${cap(demo.low)}</strong>, ` +
+    `the other swears <strong>${cap(demo.high)}</strong>. Name your corners and let the referee rule.`;
+}
+renderSettleDemo();
+
 function disputantNames() {
   return [
     $("name-a").value.trim() || "Disputant One",
@@ -820,6 +837,7 @@ function startBout() {
   const d = settle.dispute;
   const [nameA] = disputantNames();
 
+  $("settle-demo-block").hidden = true; // demo has done its job once play starts
   $("settle-arena").hidden = false;
   $("settle-verdict").hidden = true;
   renderSwatch($("settle-swatch"), $("settle-readout"), d);
