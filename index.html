@@ -469,7 +469,7 @@ footer p { margin: 0 0 1.2rem; }
       <div id="quiz-arena" hidden>
         <div class="scoreline">
           <span id="quiz-round">Round 1 / 10</span>
-          <span id="quiz-score">Matches: 0</span>
+          <span id="quiz-score">Score: 0</span>
         </div>
         <div class="swatch" id="quiz-swatch"></div>
         <p class="desc" id="quiz-readout"></p>
@@ -788,6 +788,20 @@ function generateDispute() {
   };
 }
 
+/**
+ * Like generateDispute(), but guaranteed to have a winner. The quiz always
+ * gives a binary right/wrong result, so it rejects dead-center colors and
+ * rerolls (judge() and its TOSSUP thresholds are unchanged; they act as the
+ * filter here). Bounded so a pathological run can never hang the page.
+ */
+function generateDecidedDispute() {
+  let d = generateDispute();
+  for (let tries = 0; judge(d).verdict === "toss-up" && tries < 20; tries++) {
+    d = generateDispute();
+  }
+  return d;
+}
+
 /* ----------------------------- THE JUDGE --------------------------------- */
 
 /**
@@ -895,7 +909,7 @@ const $ = id => document.getElementById(id);
 // Warm start: show one real ambiguous color above the start button so a
 // first-time visitor grasps the premise in a glance, before committing.
 function renderQuizDemo() {
-  const demo = generateDispute();
+  const demo = generateDecidedDispute();
   renderSwatch($("quiz-demo"), $("quiz-demo-readout"), demo);
   $("quiz-demo-caption").innerHTML =
     `Exhibit A. Some people see <strong>${cap(demo.low)}</strong>, ` +
@@ -928,11 +942,11 @@ function startQuiz() {
 function nextRound() {
   quiz.round++;
   quiz.locked = false;
-  quiz.dispute = generateDispute();
+  quiz.dispute = generateDecidedDispute();
   const d = quiz.dispute;
 
   $("quiz-round").textContent = `Round ${quiz.round} / ${QUIZ_ROUNDS}`;
-  $("quiz-score").textContent = `Matches: ${quiz.matches}`;
+  $("quiz-score").textContent = `Score: ${quiz.matches}`;
   $("quiz-feedback").textContent = "";
   renderSwatch($("quiz-swatch"), $("quiz-readout"), d, $("quiz-tech"));
 
@@ -952,19 +966,19 @@ function answerRound(chosen) {
   if (quiz.locked) return;
   quiz.locked = true;
 
-  const { verdict } = judge(quiz.dispute);
-  // A toss-up has no wrong answer — the crowd couldn't call it either.
-  const matched = verdict === "toss-up" || verdict === chosen;
+  let { verdict } = judge(quiz.dispute);
+  // The generator rejects toss-ups, so this is a near-impossible fallback:
+  // if one slips through, the player gets the point and a binary result.
+  if (verdict === "toss-up") verdict = chosen;
+  const matched = verdict === chosen;
   if (matched) quiz.matches++;
   quiz.history.push({ d: quiz.dispute, chosen, verdict, matched });
 
-  $("quiz-score").textContent = `Matches: ${quiz.matches}`;
+  $("quiz-score").textContent = `Score: ${quiz.matches}`;
   $("quiz-feedback").textContent =
-    verdict === "toss-up"
-      ? `That one was a genuine toss-up. Free point: even the math shrugged.`
-      : matched
-        ? `Agreed. It leans ${verdict}.`
-        : `The color leans ${verdict}. You said ${chosen}. Someone's drifting.`;
+    matched
+      ? `Correct. It leans ${verdict}.`
+      : `The color leans ${verdict}. You said ${chosen}. Someone's drifting.`;
 
   // Let the feedback breathe, then move on (or wrap up).
   setTimeout(() => {
@@ -1015,10 +1029,9 @@ function endQuiz() {
   $("quiz-recap").innerHTML = "<h3>The tape, round by round</h3>" +
     quiz.history.map((r, i) => {
       const sci = scienceFor(r.d);
-      const outcome =
-        r.verdict === "toss-up" ? "Dead-center toss-up. Free point." :
-        r.matched ? `Leans ${r.verdict}. You agreed.` :
-        `Leans ${r.verdict}. You said ${r.chosen}.`;
+      const outcome = r.matched
+        ? `Correct: it leans ${r.verdict}.`
+        : `It leans ${r.verdict}. You said ${r.chosen}.`;
       return `<div class="recap-row">
         <span class="recap-chip" style="background:${hexOf(r.d)}"></span>
         <span>${i + 1}. ${outcome}
