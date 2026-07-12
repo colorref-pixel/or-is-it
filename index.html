@@ -315,6 +315,42 @@ details.tech p { margin: .5rem 0 0; letter-spacing: .06em; }
   margin: 0 0 .3rem;
 }
 
+/* Round-by-round recap on the results screen */
+.recap { margin: 1.4rem auto 1.4rem; max-width: 560px; text-align: left; }
+.recap h3 {
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.15rem;
+  text-align: center;
+  margin: 0 0 .4rem;
+}
+.recap-row {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .5rem 0;
+  border-bottom: 1px dashed rgba(92, 82, 64, .4);
+  font-size: .92rem;
+}
+.recap-chip {
+  width: 30px; height: 30px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  flex: none;
+}
+.sci-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-style: italic;
+  color: var(--whistle-deep);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sci-link:hover { color: var(--whistle); }
+
 /* ---- Famous ones ---- */
 .famous-grid {
   display: grid;
@@ -449,6 +485,7 @@ footer p { margin: 0 0 1.2rem; }
         <p class="score" id="quiz-final-score"></p>
         <p class="title" id="quiz-final-title"></p>
         <p class="rules" id="quiz-final-blurb" style="max-width:32rem;margin:0 auto 1.2rem"></p>
+        <div class="recap" id="quiz-recap"></div>
         <button class="btn primary" id="quiz-again">Run it back</button>
       </div>
     </div>
@@ -869,7 +906,7 @@ function escapeHtml(s) {
 
 /* ---------------------------- TEST YOURSELF ------------------------------ */
 
-const quiz = { round: 0, matches: 0, dispute: null, locked: false };
+const quiz = { round: 0, matches: 0, dispute: null, locked: false, history: [] };
 
 $("quiz-start").addEventListener("click", startQuiz);
 $("quiz-again").addEventListener("click", startQuiz);
@@ -877,6 +914,7 @@ $("quiz-again").addEventListener("click", startQuiz);
 function startQuiz() {
   quiz.round = 0;
   quiz.matches = 0;
+  quiz.history = [];
   $("quiz-intro").hidden = true;
   $("quiz-final").hidden = true;
   $("quiz-arena").hidden = false;
@@ -914,6 +952,7 @@ function answerRound(chosen) {
   // A toss-up has no wrong answer — the crowd couldn't call it either.
   const matched = verdict === "toss-up" || verdict === chosen;
   if (matched) quiz.matches++;
+  quiz.history.push({ d: quiz.dispute, chosen, verdict, matched });
 
   $("quiz-score").textContent = `Matches: ${quiz.matches}`;
   $("quiz-feedback").textContent =
@@ -944,6 +983,22 @@ const QUIZ_TIERS = [
       "An extraordinary run. You saw teal and said pink. Somewhere, a color scientist felt a chill and didn't know why."],
 ];
 
+/** Map a dispute to its science case file and a one-line recap note. */
+function scienceFor(d) {
+  if (d.axis === "sat")   return { id: "sci-grey",   note: "why grey claims everything" };
+  if (d.axis === "light") return { id: "sci-olive",  note: "why dark colors change names" };
+  if (d.low === "yellow") return { id: "sci-tennis", note: "the tennis ball lives here" };
+  return { id: "sci-why", note: "a true border color" };
+}
+
+/** Jump to a science case file: switch tabs, open the card, scroll to it. */
+function goToScience(cardId) {
+  selectTab($("tab-science"));
+  const card = $(cardId);
+  card.open = true;
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function endQuiz() {
   $("quiz-arena").hidden = true;
   $("quiz-final").hidden = false;
@@ -951,6 +1006,23 @@ function endQuiz() {
   const [, title, blurb] = QUIZ_TIERS.find(([min]) => quiz.matches >= min);
   $("quiz-final-title").textContent = title;
   $("quiz-final-blurb").textContent = blurb;
+
+  // The tape: every round you just played, with a door into the science.
+  $("quiz-recap").innerHTML = "<h3>The tape, round by round</h3>" +
+    quiz.history.map((r, i) => {
+      const sci = scienceFor(r.d);
+      const outcome =
+        r.verdict === "toss-up" ? "Dead-center toss-up. Free point." :
+        r.matched ? `Leans ${r.verdict}. You agreed.` :
+        `Leans ${r.verdict}. You said ${r.chosen}.`;
+      return `<div class="recap-row">
+        <span class="recap-chip" style="background:${hexOf(r.d)}"></span>
+        <span>${i + 1}. ${outcome}
+          <button class="sci-link" data-sci="${sci.id}">${sci.note}</button></span>
+      </div>`;
+    }).join("");
+  $("quiz-recap").querySelectorAll(".sci-link").forEach(btn =>
+    btn.addEventListener("click", () => goToScience(btn.dataset.sci)));
 }
 
 /* --------------------------- THE FAMOUS ONES ------------------------------ */
