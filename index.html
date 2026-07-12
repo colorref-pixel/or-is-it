@@ -776,8 +776,9 @@ function renderSwatch(swatchEl, readoutEl, c) {
   label.textContent = hex.toUpperCase();
   label.style.color = labelColorFor(c);
   if (readoutEl) {
+    // Hex already lives on the swatch; the readout carries the HSL only.
     readoutEl.textContent =
-      `hsl(${Math.round(c.h)}°, ${Math.round(c.s)}%, ${Math.round(c.l)}%) · ${hex.toUpperCase()}`;
+      `hsl(${Math.round(c.h)}°, ${Math.round(c.s)}%, ${Math.round(c.l)}%)`;
   }
 }
 
